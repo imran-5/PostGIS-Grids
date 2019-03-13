@@ -16,7 +16,7 @@
 -- Query Usage Example:
 ---------------------------------------------------------------------------
 -- SELECT I_Grid_Triangle_Shape2(ST_MakeEnvelope(10, 10, 11, 11, 4326), .1, 100, true);
--- SELECT I_Grid_Triangle_Shape2(ST_Envelope(geom), .0001, 0) from polygons
+-- SELECT I_Grid_Triangle_Shape2(ST_Envelope(geom), .0001, 0) from polygons limit 1
 -- SELECT I_Grid_Triangle_Shape2(geom, .0001, 0) from polygons limit 1
 ---------------------------------------------------------------------------
 -- FUNCTION: public.I_Grid_Triangle_Shape2(geometry, numeric, numeric, boolean)
@@ -45,7 +45,7 @@ y_series DECIMAL; --absolute value
 geom_rotate geometry;
 geom_tri GEOMETRY := ST_GeomFromText(FORMAT('MULTIPOINT(%s %s, %s %s, %s %s, %s %s, %s %s)',
 											(-distance*.5), (0), (distance*.5), (0), (distance*.5), (0),
-											(-distance), (distance*.75), (0), (distance*.75)), 4326);
+											(-distance), (distance*.75), (0), (distance*.75)), srid);
 BEGIN
 CASE ST_SRID(geom) WHEN 0 THEN
     geom := ST_SetSRID(geom, 4326);
@@ -55,12 +55,12 @@ ELSE
 END CASE;
     input_srid:=st_srid(geom);
     geom := st_transform(geom, srid);
-	geom_rotate := ST_Rotate(geom, angle, ST_Centroid(geom));
+	  geom_rotate := ST_Rotate(geom, angle, ST_Centroid(geom));
     x_max := ST_XMax(geom_rotate);
     y_max := ST_YMax(geom_rotate);
     x_min := ST_XMin(geom_rotate);
     y_min := ST_YMin(geom_rotate);
-	x_series := CEIL( @( x_max - x_min ) / distance)*.5;
+	  x_series := CEIL( @( x_max - x_min ) / distance)*.5;
     y_series := CEIL( @( y_max - y_min ) / distance)*.75;
 
 RETURN QUERY with foo as(
@@ -70,7 +70,7 @@ SELECT ST_Rotate(ST_Translate (geom_tri, x * (distance*2) + x_min, y * (distance
         generate_series ( 0, y_series, 1) AS y)
 SELECT ST_Collect(ST_CollectionExtract(grid, 3))
 FROM (SELECT ST_Intersection(grid, geom) grid
-FROM (SELECT (st_dump(ST_DelaunayTriangles(st_collect(grid)))).geom as grid FROM foo) AS bar
-WHERE ST_intersects((grid), geom))as foo2;
+FROM (SELECT (ST_Dump(ST_DelaunayTriangles(ST_Collect(grid)))).geom as grid FROM foo) AS bar
+WHERE ST_Intersects((grid), geom))as foo2;
 END;
 $BODY$;
