@@ -13,6 +13,7 @@
 ---------------------------------------------------------------------------
 -- Query Usage Example:
 ---------------------------------------------------------------------------
+-- SELECT I_Grid_Hex(ST_MakeEnvelope(10, 10, 11, 11, 4326), .1);
 -- SELECT I_Grid_Hex(geom, .0001) from polygons limit 1
 -- SELECT I_Grid_Hex(ST_Envelope(geom), .0001) from polygons limit 1
 ---------------------------------------------------------------------------
@@ -56,19 +57,20 @@ BEGIN
 		y_max := ST_YMax(geom);
 		x_min := ST_XMin(geom);
 		y_min := ST_YMin(geom);
-		x_series := ceil ( @( x_max - x_min ) / radius );
+		x_series := ceil ( @( x_max - x_min ) / radius);
 		y_series := ceil ( @( y_max - y_min ) / radius);
 RETURN QUERY
-		with foo as(SELECT
-			st_setsrid (ST_Translate ( cell, x*(2*a+c)+x_min, y*(2*(c+a))+y_min), srid) AS hexa
+		With foo as(SELECT
+			ST_Translate ( cell, x*(2*a+c)+x_min, y*(2*(c+a))+y_min) AS hexa
 		FROM
 			generate_series ( 0, x_series, 1) AS x,
-			generate_series ( 0, y_series, 1) AS y,
+			generate_series ( -1, y_series, 1) AS y,
 			(
-			SELECT geom_grid AS cell
-				union
 			SELECT ST_Translate(geom_grid::geometry, b , a+c)  as cell
-			) AS foo where st_within(st_setsrid (ST_Translate ( cell, x*(2*a+c)+x_min, y*(2*(c+a))+y_min), srid), geom)
-		)select ST_transform(st_collect(hexa), input_srid) from foo;
+				union
+			SELECT geom_grid AS cell
+			) AS foo
+		) select ST_CollectionExtract(ST_Collect(ST_Transform(ST_Intersection(ST_CollectionExtract(hexa, 3), geom), input_srid)),3)
+		from foo where ST_Intersects(hexa, geom);
 END;
 $BODY$ LANGUAGE 'plpgsql' VOLATILE;

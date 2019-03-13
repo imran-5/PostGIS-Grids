@@ -13,6 +13,7 @@
 ---------------------------------------------------------------------------
 -- Query Usage Example:
 ---------------------------------------------------------------------------
+-- SELECT I_Grid_Regular(ST_MakeEnvelope(10, 10, 11, 11, 4326), .1, .1)
 -- SELECT I_Grid_Regular(geom, .0001, .0001) from polygons limit 1
 -- SELECT I_Grid_Regular(ST_Envelope(geom), .0001, .0001) from polygons limit 1
 ---------------------------------------------------------------------------
@@ -20,8 +21,8 @@
 
 ----DROP FUNCTION IF EXISTS I_Grid_Regular(geometry, float8, float8);
 
-
-CREATE OR REPLACE FUNCTION PUBLIC.I_Grid_Regular ( geom geometry, x_side float8, y_side float8, OUT geometry )
+CREATE OR REPLACE FUNCTION PUBLIC.I_Grid_Regular
+( geom geometry, x_side float8, y_side float8, OUT geometry )
 RETURNS SETOF geometry AS $BODY$ DECLARE
 x_max DECIMAL;
 y_max DECIMAL;
@@ -31,15 +32,17 @@ srid INTEGER := 4326;
 input_srid INTEGER;
 x_series DECIMAL;
 y_series DECIMAL;
+geom_cell geometry := ST_GeomFromText(FORMAT('POLYGON((0 0, 0 %s, %s %s, %s 0,0 0))',
+											$3, $2, $3, $2), srid);
 BEGIN
-	CASE st_srid ( geom ) WHEN 0 THEN
-		geom := ST_SetSRID ( geom, srid );
+	CASE ST_SRID (geom) WHEN 0 THEN
+		geom := ST_SetSRID (geom, srid);
 		RAISE NOTICE'SRID Not Found.';
-	ELSE 
+	ELSE
 		RAISE NOTICE'SRID Found.';
 	END CASE;
-	input_srid := st_srid ( geom );
-	geom := st_transform ( geom, srid );
+	input_srid := ST_srid ( geom );
+	geom := ST_Transform ( geom, srid );
 	x_max := ST_XMax ( geom );
 	y_max := ST_YMax ( geom );
 	x_min := ST_XMin ( geom );
@@ -47,15 +50,13 @@ BEGIN
 	x_series := CEIL ( @( x_max - x_min ) / x_side );
 	y_series := CEIL ( @( y_max - y_min ) / y_side );
 
-	RETURN QUERY WITH res AS (
+	RETURN QUERY With foo AS (
 		SELECT
-			st_collect (st_setsrid ( ST_Translate ( cell, j * $2 + x_min, i * $3 + y_min ), srid )) AS grid 
+		ST_Translate( geom_cell, j * $2 + x_min, i * $3 + y_min ) AS cell
 		FROM
 			generate_series ( 0, x_series ) AS j,
-			generate_series ( 0, y_series ) AS i,
-			( 
-			SELECT ( 'POLYGON((0 0, 0 ' ||$3 || ', ' ||$2 || ' ' ||$3 || ', ' ||$2 || ' 0,0 0))' ) :: geometry AS cell 
-			) AS foo WHERE ST_Within ( st_setsrid ( ST_Translate ( cell, j * $2 + x_min, i * $3 + y_min ), srid ), geom )
-		) SELECT st_transform ( grid, input_srid ) FROM res;
+			generate_series ( 0, y_series ) AS i
+		) SELECT ST_CollectionExtract(ST_Collect(ST_Transform ( ST_Intersection(cell, geom), input_srid)), 3)
+		FROM foo where ST_intersects (cell, geom);
 END;
 $BODY$ LANGUAGE plpgsql IMMUTABLE STRICT;
