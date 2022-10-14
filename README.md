@@ -5,4 +5,4 @@ This repo contain multiple algorithms to make Hex (Hexagon), Triangle (Triangula
 
 ## Example
 
-![postgis](https://github.com/imran-5/PostGIS-grids/blob/master/Hex_grid/Hex.PNG)
+![postgis](https://github.com/imran-5/PostGIS-grids/blob/master/Hex_Grid/Hex.PNG)
