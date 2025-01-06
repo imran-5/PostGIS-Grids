@@ -8,8 +8,7 @@
 -- The internal algorithm of function generate series based on input x_side and y_side distance by applying coordinate distance.
 -- The function handle almost any SRID, internal queries of function render by applying SRID:4326, SRID:900913 and output of query transformed back to input SRID.
 -- Requirement: PostGIS Full Version
--- Developed by: newton.imran[at]gmail[dot]com
--- Licence: GNU GPL version 3.0
+-- Licence: MIT
 ---------------------------------------------------------------------------
 -- Query Usage Example:
 ---------------------------------------------------------------------------

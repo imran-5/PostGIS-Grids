@@ -8,8 +8,7 @@
 -- and project the points to x_side and y_side based on actual/true distance and angle.
 -- The function handle almost any SRID, internal queries of function render by applying SRID:4326 and output of query transformed back to input SRID.
 -- Requirement: PostGIS Full Version
--- Developed by: newton.imran[at]gmail[dot]com
--- Licence: GNU GPL version 3.0
+-- Licence: MIT
 ---------------------------------------------------------------------------
 -- Query Usage Example:
 ---------------------------------------------------------------------------
