@@ -12,5 +12,5 @@ This repo contain multiple algorithms to make Hex (Hexagon), Triangle (Triangula
 
 Project start date to end of 2024.
 
-[![Haiberg GmbH](https://i.ibb.co/JQWQCSR/haiberg-gmbh-logo.jpg)](http://www.haiberg.com)
+[![Haiberg GmbH](https://i.ibb.co/JQWQCSR/haiberg-gmbh-logo.jpg)](https://www.haiberg.com)
 [![www.vmap.rocks](https://i.ibb.co/jWk6rn2/vmap-rocks-logo.png)](https://www.vmap.rocks/)

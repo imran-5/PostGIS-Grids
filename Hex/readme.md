@@ -1,4 +1,4 @@
 # Postgis-Custom
-PostGIS Custom Function to make hex grid within extent envelope
+PostGIS Custom function to make hex grid.
 
-![postgis](https://github.com/ImranMax/PostGIS-Custom/blob/master/Hex/intersected.PNG)
+<!-- ![postgis](https://github.com/ImranMax/PostGIS-Custom/blob/master/Hex/intersected.PNG) -->
